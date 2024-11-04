@@ -7,16 +7,17 @@ import json
 from kafka import KafkaProducer, KafkaConsumer
 
 # Kafka Configuration
-KAFKA_BROKER = "localhost:9092"  # Replace with your Kafka broker address
+KAFKA_BROKER = "localhost:9092,localhost:9093,localhost:9094"  # Replace with your Kafka broker address
 # Internal Listeners kafka1:9092,kafka2:9092,kafka3:9092
 SENSOR_TOPIC = "sensor_data"
-GPS_TOPIC = "gps_data"
+
+EVENT_FILE = "event_data.txt"
 
 #tion to consume data from Kafka topics Func
-def consume_data():
+def consume_sensor_data():
     # Initialize Kafka Consumer for both topics
     consumer = KafkaConsumer(
-        SENSOR_TOPIC, GPS_TOPIC,
+        SENSOR_TOPIC,
         bootstrap_servers=KAFKA_BROKER,
         auto_offset_reset="earliest",
         group_id="data_consumers",
@@ -26,8 +27,13 @@ def consume_data():
     for message in consumer:
         topic = message.topic
         data = message.value
-        print(f"Consumed from {topic}: {data}")
+
+        # Write event data to disk
+        with open(EVENT_FILE, mode="a") as file:
+            file.write(json.dumps(data) + "\n")
+
+        print(f"Event Data Written: {data}")
 
 # run the consumer
 if __name__ == "__main__":
-    consume_data()
+    consume_sensor_data()

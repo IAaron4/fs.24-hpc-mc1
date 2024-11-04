@@ -5,12 +5,17 @@ import json
 from kafka import KafkaProducer, KafkaConsumer
 
 # Kafka Configuration
-KAFKA_BROKER = "kafka1:9092,kafka2:9092,kafka3:9092"  # Replace with your Kafka broker address
+KAFKA_BROKER = "localhost:9092,localhost:9093,localhost:9094"
 SENSOR_TOPIC = "sensor_data"
 GPS_TOPIC = "gps_data"
 
 # Initialize Kafka Producer
-producer = KafkaProducer(
+producer_gps = KafkaProducer(
+    bootstrap_servers=KAFKA_BROKER,
+    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+)
+
+producer_sensor = KafkaProducer(
     bootstrap_servers=KAFKA_BROKER,
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
@@ -27,8 +32,8 @@ async def sensor_data_generator():
         }
 
         # Produce event data to Kafka
-        producer.send(SENSOR_TOPIC, sensor_data)
-        producer.flush()  # Ensure data is sent
+        producer_gps.send(SENSOR_TOPIC, sensor_data)
+        producer_gps.flush()  # Ensure data is sent
 
         print(f"Event Data (10 Hz): {sensor_data}")
         await asyncio.sleep(0.1)  # 10 Hz -> every 0.1 seconds
@@ -49,8 +54,8 @@ async def gps_data_generator():
         }
 
         # Produce GPS data to Kafka
-        producer.send(GPS_TOPIC, gps_data)
-        producer.flush()  # Ensure data is sent
+        producer_gps.send(GPS_TOPIC, gps_data)
+        producer_gps.flush()  # Ensure data is sent
 
         print(f"GPS Data (2 Hz): {gps_data}")
         await asyncio.sleep(0.5)  # 2 Hz -> every 0.5 seconds
