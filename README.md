@@ -1,4 +1,4 @@
-# Mini-Challenge 1 - High Performance Computing (hpc) FS24
+[# Mini-Challenge 1 - High Performance Computing (hpc) FS24
 
 ## Containers, Communication Patterns/Frameworks and Performance Analysis
 
@@ -13,7 +13,8 @@ You design a micro service based application, which has multiple producers of da
     We start with a Docker compose template, which launches 5 containers:
 
     * broker-[x] - Kafka brokers
-    * jupyter    - Jupyter environment for the connection to our Kafka cluster using notebooks
+    * jupyter    - Jupyter environment for the connection to our Kafka cluster using notebooks (This is not good, you should atleast preinstall wand fully)
+    * I removed the instance because it's hard to install wand
     * kafdrop    - web UI for browsing and monitoring Kafka clusters
 
 2. Open the Jupyter notebook on your machine using: http://127.0.0.1:8888. Start to play around with sending and receiving messages. Use [Kafdrop]( https://github.com/obsidiandynamics/kafdrop) to monitor/explore your cluster, topics, and messages. For example, start and stop individual brokers (e.g. via Docker Desktop) or change Kafka parameters such as the replication factor and watch how the cluster behaves via Kafdrop.
@@ -107,3 +108,4 @@ What would you do differently in the future? What would you change in the assign
 * Getting started with Kafka: https://towardsdatascience.com/getting-started-with-apache-kafka-in-python-604b3250aa05
 * In-depth Kafka online course: https://www.udemy.com/course/apache-kafka/
 * Excellent guide on low level communication patterns: https://zguide.zeromq.org/
+]()
