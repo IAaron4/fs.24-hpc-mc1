@@ -2,7 +2,7 @@ version: '3'
 services:
   kafka1:
     image: confluentinc/cp-kafka
-    container_name: kafka1_ex1
+    container_name: kafka1_ex2
     hostname: kafka1
     ports:
       - "9092:9092"
@@ -12,7 +12,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
       KAFKA_LISTENERS: 'INTERNAL://:19092,CONTROLLER://:29092,EXTERNAL://:9092'
-      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka3:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka1:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29092,2@kafka2:29093,3@kafka3:29094'
       KAFKA_PROCESS_ROLES: 'broker,controller'
@@ -24,7 +24,7 @@ services:
 
   kafka2:
     image: confluentinc/cp-kafka
-    container_name: kafka2_ex1
+    container_name: kafka2_ex2
     hostname: kafka2
     ports:
       - "9093:9093"
@@ -34,7 +34,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
       KAFKA_LISTENERS: 'INTERNAL://:19093,CONTROLLER://:29093,EXTERNAL://:9093'
-      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka3:19093,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka2:19093,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9093'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29092,2@kafka2:29093,3@kafka3:29094'
       KAFKA_PROCESS_ROLES: 'broker,controller'
@@ -46,7 +46,7 @@ services:
 
   kafka3:
     image: confluentinc/cp-kafka
-    container_name: kafka3_ex1
+    container_name: kafka3_ex2
     hostname: kafka3
     ports:
       - "9094:9094"
@@ -66,9 +66,22 @@ services:
       CLUSTER_ID: 'BDb4EWyiS1GjcEKCew2HvQ'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
 
+  schema-registry:
+    image: confluentinc/cp-schema-registry
+    hostname: schema-registry
+    container_name: schema-registry-ex-2
+    depends_on:
+      - kafka1
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka1:19092,kafka2:19093,kafka3:19094'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
-    container_name: kafdrop1
+    container_name: kafdrop-ex-2
     ports:
       - "9000:9000"
     environment:

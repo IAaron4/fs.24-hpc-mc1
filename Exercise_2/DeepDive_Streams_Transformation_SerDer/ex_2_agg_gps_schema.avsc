@@ -1,0 +1,1 @@
+{"type": "record","name": "Message","namespace": "com.gps.agg","fields": [{"name": "id", "type": "int"},{"name": "avg_latitude", "type": "double"}, {"name": "avg_longitude", "type": "double"},{"name": "timestamp", "type": "double"}]}

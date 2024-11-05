@@ -7,7 +7,7 @@ from kafka import KafkaProducer, KafkaConsumer
 from datetime import datetime
 
 # Kafka Configuration
-KAFKA_BROKER = "localhost:9092"  # Replace with your Kafka broker address
+KAFKA_BROKER = "localhost:9092"
 EVENT_TOPIC = "event_data"
 GPS_TOPIC = "gps_data"
 AGG_GPS_TOPIC = "agg_gps_topic"

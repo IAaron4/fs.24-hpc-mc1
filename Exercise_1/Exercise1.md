@@ -45,3 +45,4 @@ You design a micro service based application, which has multiple producers of da
 
 #### Bonus 1
 Use more efficient serializers/deserializers than JSON for the messages.
+ 

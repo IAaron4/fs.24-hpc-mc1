@@ -7,7 +7,7 @@ import json
 from kafka import KafkaProducer, KafkaConsumer
 
 # Kafka Configuration
-KAFKA_BROKER = "localhost:9092,localhost:9093,localhost:9094"  # Replace with your Kafka broker address
+KAFKA_BROKER = "localhost:9092,localhost:9093,localhost:9094"
 # Internal Listeners kafka1:9092,kafka2:9092,kafka3:9092
 AGG_GPS_TOPIC = "agg_gps_topic"
 

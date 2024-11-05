@@ -1,0 +1,1 @@
+{"type": "record","name": "Message","namespace": "com.gps","fields": [{"name": "latitude", "type": "double"},{"name": "longitude", "type": "double"},{"name": "speed", "type": "double"},{"name": "timestamp", "type": "double"}]}
