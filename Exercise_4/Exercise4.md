@@ -16,3 +16,4 @@ Mitigate or produce a bottleneck.
 
 Write a reflection on the realization of the mini-challenge. What went well? Where did problems occur? Where did you need more time than planned? 
 What would you do differently in the future? What would you change in the assignment? Give examples in each case.
+

@@ -1,0 +1,87 @@
+services:
+  rabbitmq_ex4:
+    image: rabbitmq:3-management
+    hostname: rabbitmq_ex4
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  data-producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.producer
+    container_name: data-producer-ex4
+    environment:
+      - RABBITMQ_HOST=rabbitmq_ex4
+    depends_on:
+      rabbitmq_ex4:
+        condition: service_healthy
+    networks:
+      - network
+    restart: unless-stopped
+
+  sensor-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.sensor-consumer
+    container_name: sensor-consumer-ex4
+    volumes:
+      - ./data:/app/data
+    environment:
+      - RABBITMQ_HOST=rabbitmq_ex4
+    depends_on:
+      rabbitmq_ex4:
+        condition: service_healthy
+    networks:
+      - network
+    restart: unless-stopped
+
+  gps-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.gps-consumer
+    container_name: gps-consumer-ex4
+    volumes:
+      - ./data:/app/data
+    environment:
+      - RABBITMQ_HOST=rabbitmq_ex4
+    depends_on:
+      rabbitmq_ex4:
+        condition: service_healthy
+    networks:
+      - network
+    restart: unless-stopped
+
+  agg-gps-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.agg-gps-consumer
+    container_name: app-gps-consumer-ex4
+    environment:
+      - RABBITMQ_HOST=rabbitmq_ex4
+    depends_on:
+      rabbitmq_ex4:
+        condition: service_healthy
+    networks:
+      - network
+    restart: unless-stopped
+
+networks:
+  network:
+    driver: bridge
+
+volumes:
+  rabbitmq-data:
+  data:

@@ -1,0 +1,151 @@
+version: '3'
+services:
+  kafka1:
+    image: confluentinc/cp-kafka
+    container_name: kafka1_ex4
+    hostname: kafka1
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_LISTENERS: 'INTERNAL://:19092,CONTROLLER://:29092,EXTERNAL://:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka1:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29092,2@kafka2:29093,3@kafka3:29094'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      CLUSTER_ID: 'BDb4EWyiS1GjcEKCew2HvQ'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+    networks:
+      - network
+
+  kafka2:
+    image: confluentinc/cp-kafka
+    container_name: kafka2_ex4
+    hostname: kafka2
+    ports:
+      - "9093:9093"
+      - "29093:29093"
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_LISTENERS: 'INTERNAL://:19093,CONTROLLER://:29093,EXTERNAL://:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka2:19093,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9093'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29092,2@kafka2:29093,3@kafka3:29094'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      CLUSTER_ID: 'BDb4EWyiS1GjcEKCew2HvQ'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+    networks:
+      - network
+
+  kafka3:
+    image: confluentinc/cp-kafka
+    container_name: kafka3_ex4
+    hostname: kafka3
+    ports:
+      - "9094:9094"
+      - "29094:29094"
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_LISTENERS: 'INTERNAL://:19094,CONTROLLER://:29094,EXTERNAL://:9094'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka3:19094,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9094'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29092,2@kafka2:29093,3@kafka3:29094'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      CLUSTER_ID: 'BDb4EWyiS1GjcEKCew2HvQ'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+    networks:
+      - network
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry
+    hostname: schema-registry
+    container_name: schema-registry-ex-4
+    depends_on:
+      - kafka1
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka1:19092,kafka2:19093,kafka3:19094'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    networks:
+      - network
+    healthcheck:
+      test: [ "CMD", "curl", "--output", "/dev/null", "--silent", "--head", "--fail", "http://schema-registry:8081/subjects" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafdrop-ex-4
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka1:19092,kafka2:19093,kafka3:19094"
+    depends_on:
+      - kafka1
+    networks:
+      - network
+
+  data-producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.producer
+    container_name: data-producer-ex4-kafka
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      schema-registry:
+        condition: service_healthy
+    networks:
+      - network
+    restart: unless-stopped
+
+  gps-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.gps-consumer
+    container_name: gps-consumer-ex4-kafka
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      schema-registry:
+        condition: service_healthy
+    networks:
+      - network
+    restart: unless-stopped
+
+  agg-gps-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.agg-gps-consumer
+    container_name: app-gps-consumer-ex4-kafka
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      schema-registry:
+        condition: service_healthy
+    networks:
+      - network
+    restart: unless-stopped
+
+networks:
+  network:
+    driver: bridge
