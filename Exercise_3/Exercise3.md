@@ -8,7 +8,23 @@
 3. Answer the following questions and interpret your experiments or results: 
       * Compare the communication patterns of Kafka and your chosen technology. Where are they similar, where different? How do those patterns work? Are there advantages or disadvantages of those patterns? 
       * Are there any known issues with those patterns? If yes, how could those issues be mitigated or on the other hand provoked? If possible, show this with an experiment.
-      * How scalable are those two approaches? What challenges need to be considered? 
+      * How scalable are those two approaches? What challenges need to be considered?
+
+**Communication Patterns**
+- **Kafka**: Primarily uses a high-throughput **pub-sub pattern** with persistent message storage in **topics**. Ideal for event streaming and data pipelines, allowing replays but with potentially higher latency.
+- **RabbitMQ**: Offers **message queuing** with flexible routing via **exchanges** (direct, topic, fanout, headers). Optimized for low-latency, transactional tasks, and supports complex workflows, but may lose messages without persistence enabled.
+
+**Known Issues**
+- **Kafka**:
+  - **Consumer Lag**: Slow consumers can fall behind with high message volumes. *Mitigation*: Add consumers or auto-scale, monitor lag.
+  - **Rebalancing Delays**: Consumer group rebalances can briefly disrupt processing. *Mitigation*: Configure timeouts, use sticky partitioning.
+- **RabbitMQ**:
+  - **Message Loss Without Persistence**: Messages may be lost if consumers are down. *Mitigation*: Enable persistent queues and acknowledgments.
+  - **Queue Bottlenecks**: High-load queues can limit throughput. *Mitigation*: Shard queues across nodes, use clustering.
+
+**Scalability**
+- **Kafka**: Scales horizontally by adding brokers and partitions, suitable for large-scale streaming. Challenges include network bandwidth and data rebalancing.
+- **RabbitMQ**: Scales through clustering and sharding queues, but less suited for high throughput compared to Kafka. Works best for smaller-scale, low-latency applications.
 
 #### Bonus 3
 Show how your container setup could be integrated into a container orchestration system (such as Kubernets) and how it would profit from this. Or show how you could replace some of the components with cloud-based offers and what changes/considerations come with this.

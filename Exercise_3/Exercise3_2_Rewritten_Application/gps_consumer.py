@@ -5,14 +5,15 @@ import pika
 from datetime import datetime
 from collections import deque
 from threading import Lock, Timer
+import os
 
 # RabbitMQ Configuration
-RABBITMQ_HOST = "localhost"
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
 RABBITMQ_USER = "guest"
 RABBITMQ_PASSWORD = "guest"
 GPS_QUEUE = "gps_data"
-AGG_GPS_QUEUE = "agg_gps_data"
-GPS_CSV_FILE = "aggregated_gps_data.csv"
+AGG_GPS_QUEUE = "AGG_GPS_DATA"
+GPS_CSV_FILE = "/app/data/aggregated_gps_data.csv"
 
 
 class GPSDataConsumer:
@@ -23,13 +24,18 @@ class GPSDataConsumer:
             credentials=pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD)
         ))
 
+        self.connection2 = pika.BlockingConnection(pika.ConnectionParameters(
+            host=RABBITMQ_HOST,
+            credentials=pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD)
+        ))
+
+        # Channel for publishing aggregated data
+        self.channel_agg = self.connection2.channel()
+        self.channel_agg.queue_declare(queue=AGG_GPS_QUEUE)
+
         # Channel for consuming GPS data
         self.channel_gps = self.connection.channel()
         self.channel_gps.queue_declare(queue=GPS_QUEUE)
-
-        # Channel for publishing aggregated data
-        self.channel_agg = self.connection.channel()
-        self.channel_agg.queue_declare(queue=AGG_GPS_QUEUE)
 
         # Initialize buffer and lock
         self.gps_buffer = deque()
@@ -66,8 +72,7 @@ class GPSDataConsumer:
                 agg_gps_data = {
                     "timestamp": aggregation_timestamp,
                     "avg_latitude": avg_lat,
-                    "avg_longitude": avg_lon,
-                    "num_points": len(self.gps_buffer)
+                    "avg_longitude": avg_lon
                 }
 
                 # Publish aggregated data
